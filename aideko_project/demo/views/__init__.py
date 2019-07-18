@@ -1,1 +1,0 @@
-from .frontend import news_list
