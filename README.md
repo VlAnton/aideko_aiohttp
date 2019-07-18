@@ -5,7 +5,7 @@
 -----------------------------------
 
 - python3 -m venv aideko
-- . aideko/bin/activate
+- source aideko/bin/activate
 - pip install --upgrade pip; pip install -r requirements.txt
 - cd aideko_project
 - python entry.py
