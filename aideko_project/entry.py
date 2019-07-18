@@ -1,15 +1,7 @@
 import aiohttp
-import asyncio
-# import aioreloader
+import aiohttp
 
 from demo import create_app
-
-# try:
-#     import uvloop
-#     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-# except ImportError:
-#     print('No such library: uvloop')
-
 
 
 app: 'Application' = create_app()
