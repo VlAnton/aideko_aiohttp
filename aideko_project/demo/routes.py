@@ -1,4 +1,5 @@
 from aiohttp.web import Application
+
 from .views import news_list, news_detail
 
 

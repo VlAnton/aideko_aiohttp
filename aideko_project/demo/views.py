@@ -1,40 +1,17 @@
 from aiohttp.web import Request, Response
-
 from iso8601 import parse_date
 
 import json
-import os
 
-
-CUR_DIR_DECONSTRUCTED: list = __file__.split('/')
-APP_DIR: str = '/'.join(CUR_DIR_DECONSTRUCTED[0:len(CUR_DIR_DECONSTRUCTED)-1]) + '/models/'
-NEWS_PATH: str = os.path.join(APP_DIR, 'news.json')
-COMMENTS_PATH = os.path.join(APP_DIR, 'comments.json')
+from .settings import NEWS_PATH, COMMENTS_PATH
 
 
 def get_model_data(path):
     with open(path, 'r') as f:
         return json.loads(f.read())    
 
-
-async def news_list(request: 'Request') -> 'Response':
-    news_dict: dict = get_model_data(NEWS_PATH)
-    news_list = list()
-
-    for news in news_dict['news']:
-        if news['deleted']:
-            news_dict['news_count'] -= 1
-        else:
-            news_list.append(news)
-
-    news_dict['news'] = news_list
-
-    return Response(text=json.dumps(news_dict, indent=4))
-
-
 def sort_by_date(item):
     return parse_date(item['date'])
-
 
 def check_news_item(
         news_item_id: int,
@@ -48,6 +25,20 @@ def check_news_item(
 
     return id_not_exists or id_deleted
 
+
+async def news_list(request: 'Request') -> 'Response':
+    news_dict: dict = get_model_data(NEWS_PATH)
+    news_list = list()
+
+    for news_item in news_dict['news']:
+        if news_item['deleted']:
+            news_dict['news_count'] -= 1
+        else:
+            news_list.append(news_item)
+
+    news_dict['news'] = news_list
+
+    return Response(text=json.dumps(news_dict, indent=4))
 
 async def news_detail(request: 'Request') -> 'Response':
     try:
