@@ -6,9 +6,11 @@ import json
 from .settings import NEWS_PATH, COMMENTS_PATH
 
 
-def get_model_data(path):
+def get_model_data(path, model):
     with open(path, 'r') as f:
-        return json.loads(f.read())    
+        data = json.loads(f.read())
+        print({item['id']:item for item in data[model]})
+        return data
 
 def sort_by_date(item):
     return parse_date(item['date'])
@@ -25,9 +27,14 @@ def check_news_item(
 
     return id_not_exists or id_deleted
 
+def retrieve_news_item(news_item_id: int, news_list: list) -> dict:
+    for news_item in news_list:
+        if news_item['id'] == news_item_id:
+            return news_item
+
 
 async def news_list(request: 'Request') -> 'Response':
-    news_dict: dict = get_model_data(NEWS_PATH)
+    news_dict: dict = get_model_data(NEWS_PATH, 'news')
     news_list = list()
 
     for news_item in news_dict['news']:
@@ -43,10 +50,10 @@ async def news_list(request: 'Request') -> 'Response':
 async def news_detail(request: 'Request') -> 'Response':
     try:
         news_item_id = int(str(request.rel_url)[1:])
-        news_dict: dict = get_model_data(NEWS_PATH)
-        news_item: dict = news_dict['news'][news_item_id-1]
+        news_list: list = get_model_data(NEWS_PATH, 'news')['news']
+        news_item: dict = retrieve_news_item(news_item_id, news_list)
 
-        if check_news_item(news_item_id, news_item, news_dict['news']):
+        if check_news_item(news_item_id, news_item, news_list):
             raise ValueError
 
     except (ValueError, IndexError):
@@ -55,7 +62,7 @@ async def news_detail(request: 'Request') -> 'Response':
             status=404
         )
 
-    comments_dict: dict = get_model_data(COMMENTS_PATH)
+    comments_dict: dict = get_model_data(COMMENTS_PATH, 'comments')
 
     news_item['comments'] = list()
     news_item['comments_count'] = int()
