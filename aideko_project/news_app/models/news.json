@@ -13,7 +13,14 @@
             "date": "2019-01-01T20:56:35",
             "body": "The news",
             "deleted": false
+        },
+        {
+            "id": 3,
+            "title": "news_3",
+            "date": "2000-01-01T20:56:35",
+            "body": "The news",
+            "deleted": false
         }
     ],
-    "news_count": 2
+    "news_count": 3
 }

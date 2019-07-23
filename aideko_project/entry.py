@@ -1,7 +1,6 @@
 import aiohttp
-import aiohttp
 
-from demo import create_app
+from news_app import create_app
 
 
 app: 'Application' = create_app()
