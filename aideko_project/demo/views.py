@@ -6,57 +6,39 @@ import json
 from .settings import NEWS_PATH, COMMENTS_PATH
 
 
-def get_model_data(path, model):
+def get_model_data(path: str, model: str) -> dict:
     with open(path, 'r') as f:
-        data = json.loads(f.read())
-        print({item['id']:item for item in data[model]})
-        return data
+        data: dict = json.loads(f.read())
+        return {item['id']:item for item in data[model]}
 
-def sort_by_date(item):
+def sort_by_date(item: dict):
     return parse_date(item['date'])
-
-def check_news_item(
-        news_item_id: int,
-        news_item: dict,
-        news_list: list
-        ) -> bool:
-    ids: set = {news['id'] for news in news_list}
-
-    id_not_exists: bool = news_item_id not in ids
-    id_deleted: bool = news_item['deleted'] == True
-
-    return id_not_exists or id_deleted
-
-def retrieve_news_item(news_item_id: int, news_list: list) -> dict:
-    for news_item in news_list:
-        if news_item['id'] == news_item_id:
-            return news_item
 
 
 async def news_list(request: 'Request') -> 'Response':
-    news_dict: dict = get_model_data(NEWS_PATH, 'news')
-    news_list = list()
+    news: dict = get_model_data(NEWS_PATH, 'news')
+    news_response: dict = {
+        'news': [],
+        'news_count': 0
+    }
 
-    for news_item in news_dict['news']:
-        if news_item['deleted']:
-            news_dict['news_count'] -= 1
-        else:
-            news_list.append(news_item)
+    for news_item in news.values():
+        if not news_item['deleted']:
+            news_response['news_count'] += 1
+            news_response['news'].append(news_item)
 
-    news_dict['news'] = news_list
-
-    return Response(text=json.dumps(news_dict, indent=4))
+    return Response(text=json.dumps(news_response, indent=4))
 
 async def news_detail(request: 'Request') -> 'Response':
     try:
-        news_item_id = int(str(request.rel_url)[1:])
-        news_list: list = get_model_data(NEWS_PATH, 'news')['news']
-        news_item: dict = retrieve_news_item(news_item_id, news_list)
+        news_item_id = int(request.match_info['id'])
+        news: dict = get_model_data(NEWS_PATH, 'news')
+        news_item: dict = news.get(news_item_id)
 
-        if check_news_item(news_item_id, news_item, news_list):
+        if not news_item or news_item['deleted'] == True:
             raise ValueError
 
-    except (ValueError, IndexError):
+    except ValueError:
         return Response(
             text='{\n\t"error": "news id is incorrect or deleted"\n}',
             status=404
@@ -67,11 +49,11 @@ async def news_detail(request: 'Request') -> 'Response':
     news_item['comments'] = list()
     news_item['comments_count'] = int()
 
-    for comment in comments_dict['comments']:
+    for comment in comments_dict.values():
         if comment['news_id'] == news_item_id:
             news_item['comments'].append(comment)
             news_item['comments_count'] += 1
-    
+
     news_item['comments'].sort(key=sort_by_date)
 
     return Response(text=json.dumps(news_item, indent=4), status=200)
