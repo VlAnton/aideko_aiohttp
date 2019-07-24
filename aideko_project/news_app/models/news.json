@@ -17,7 +17,14 @@
         {
             "id": 3,
             "title": "news_3",
-            "date": "2000-01-01T20:56:35",
+            "date": "2020-01-01T20:56:35",
+            "body": "The news",
+            "deleted": false
+        },
+        {
+            "id": 4,
+            "title": "news_4",
+            "date": "2018-01-01T20:56:35",
             "body": "The news",
             "deleted": false
         }

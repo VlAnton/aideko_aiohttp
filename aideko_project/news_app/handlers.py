@@ -59,9 +59,14 @@ class DataHandler:
         comments: dict = cls.get_model_data(COMMENTS_PATH)
 
         if comments:
-            comments_for_item: list = comments.get(news_id)
+            comments_for_item: list or None = comments.get(news_id)
 
             if comments_for_item:
+                comments_for_item = list(filter(
+                    lambda item: cls.is_date(item['date']),
+                    comments_for_item
+                ))
+
                 if is_detail:
                     comments_for_item.sort(key=cls.sort_by_date)
                     news_item['comments'] = comments_for_item

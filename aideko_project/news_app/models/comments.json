@@ -34,6 +34,20 @@
             "title": "comment_5",
             "date": "2018-01-02T21:48:01",
             "comment": "Comment"
+        },
+        {
+            "id": 6,
+            "news_id": 4,
+            "title": "comment_6",
+            "date": "2018-01-02T21:48:01",
+            "comment": "Comment"
+        },
+        {
+            "id": 7,
+            "news_id": 4,
+            "title": "comment_7",
+            "date": "2020-01-02T21:48:01",
+            "comment": "Comment"
         }
     ],
     "comments_count": 5
