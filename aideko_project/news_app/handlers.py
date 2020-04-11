@@ -31,7 +31,6 @@ class DataHandler:
                 comments[news_id] = [comment]
             else:
                 comments[news_id].append(comment)
-
         return comments
 
     @classmethod
@@ -50,7 +49,6 @@ class DataHandler:
 
             if data.get('news'):
                 return cls._get_news_data(data)
-
             return cls._get_comments_data(data)
     
     @classmethod
@@ -62,44 +60,46 @@ class DataHandler:
             comments_for_item: list or None = comments.get(news_id)
 
             if comments_for_item:
-                comments_for_item = list(filter(
-                    lambda item: cls.is_date(item['date']),
-                    comments_for_item
-                ))
+                comments_for_item = list(
+                    filter(
+                        lambda item: cls.is_date(item['date']),
+                        comments_for_item
+                    )
+                )
 
                 if is_detail:
                     comments_for_item.sort(key=cls.sort_by_date)
                     news_item['comments'] = comments_for_item
-
                 news_item['comments_count'] = len(comments_for_item)
     
     @classmethod
     def is_date(cls, date: str) -> bool:
         try:
             date: 'datetime' = cls._parse_date(date)
-
-            return date and date < datetime.now()
-
         except ValueError:
             return False
-    
+        else:
+            return date and date < datetime.now()
+
     @classmethod
     def retrieve_news_item(cls, request: 'Request') -> tuple:
         '''Получения новости по id. В случае неудачи возвращает tuple с ошибкой'''
         try:
             news_id = int(request.match_info['id'])
-            news: dict = DataHandler.get_model_data(NEWS_PATH)
+            news: dict = cls.get_model_data(NEWS_PATH)
             news_item: dict = news.get(news_id)
 
-            if not (news_item and
-                    news_item['deleted'] == False and
-                    cls.is_date(news_item['date'])):
+            if not (
+                news_item and
+                not news_item['deleted'] and
+                cls.is_date(news_item['date'])
+            ):
                 raise ValueError
-
             return news_id, news_item
 
         except ValueError:
-            return 0, Response(
+            response = Response(
                 text='{\n\t"error": "news id is incorrect or deleted"\n}',
                 status=404
             )
+            return 0, response
